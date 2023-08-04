@@ -2,25 +2,24 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
-}
-
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: ImageUploadScreen(),
+      home: const ImageUploadScreen(),
+      theme: ThemeData(primarySwatch: Colors.amber),
     );
   }
 }
 
 class ImageUploadScreen extends StatefulWidget {
+  const ImageUploadScreen({super.key});
   @override
+  // ignore: library_private_types_in_public_api
   _ImageUploadScreenState createState() => _ImageUploadScreenState();
 }
 
@@ -50,7 +49,10 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
           _uploadedImageUrl = downloadUrl;
         });
       } catch (e) {
-        print("Error uploading image: $e");
+        FlutterError.onError = (execption) {
+          FlutterError.presentError(execption);
+          if (kReleaseMode) exit(1);
+        };
       }
     }
   }
@@ -63,8 +65,11 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
         setState(() {
           _uploadedImageUrl = null;
         });
-      } catch (e) {
-        print("Error deleting image: $e");
+      } catch (execption) {
+        FlutterError.onError = (execption) {
+          FlutterError.presentError(execption);
+          if (kReleaseMode) exit(1);
+        };
       }
     }
   }
@@ -73,7 +78,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Image Upload"),
+        title: const Text("Image Upload"),
       ),
       body: Center(
         child: Column(
@@ -87,11 +92,11 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
               ),
             ElevatedButton(
               onPressed: _pickImage,
-              child: Text("Pick Image"),
+              child: const Text("Pick Image"),
             ),
             ElevatedButton(
               onPressed: _uploadImage,
-              child: Text("Upload Image"),
+              child: const Text("Upload Image"),
             ),
             if (_uploadedImageUrl != null)
               Image.network(
@@ -101,11 +106,17 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
               ),
             ElevatedButton(
               onPressed: _deleteImage,
-              child: Text("Delete Image"),
+              child: const Text("Delete Image"),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MyApp());
 }
